@@ -1,0 +1,64 @@
+#include <iostream>
+using namespace std;
+
+// Node structure to represent non-zero elements in the sparse matrix
+struct Node {
+    int row;    // Row index of the non-zero element
+    int col;    // Column index of the non-zero element
+    int value;  // Value of the non-zero element
+    Node* next; // Pointer to the next node in the linked list
+
+    // Constructor to initialize the node
+    Node(int r, int c, int v) : row(r), col(c), value(v), next(nullptr) {}
+};
+
+class SparseMatrix {
+private:
+    Node* head; // Head pointer to the linked list of non-zero elements
+
+public:
+    // Constructor to initialize an empty sparse matrix
+    SparseMatrix() : head(nullptr) {}
+
+    // Method to insert a non-zero element into the sparse matrix
+    void insert(int row, int col, int value) {
+        if (value != 0) {
+            Node* newNode = new Node(row, col, value);
+            newNode->next = head; // Insert at the beginning (head) of the linked list
+            head = newNode;       // Update the head to the new node
+        }
+    }
+
+    // Method to display the non-zero elements of the sparse matrix
+    void display() {
+        Node* current = head;
+        cout << "Row\tColumn\tValue\n";
+        while (current != nullptr) {
+            cout << current->row << "\t" << current->col << "\t" << current->value << "\n";
+            current = current->next;
+        }
+    }
+
+    // Destructor to free dynamically allocated memory
+    ~SparseMatrix() {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next; // Move head to the next node
+            delete temp;       // Delete the current node
+        }
+    }
+};
+
+int main() {
+    SparseMatrix sm;
+
+    // Insert non-zero elements into the sparse matrix
+    sm.insert(0, 2, 3);
+    sm.insert(2, 1, 4);
+    sm.insert(2, 3, 5);
+
+    // Display the non-zero elements of the sparse matrix
+    sm.display();
+
+    return 0;
+}
