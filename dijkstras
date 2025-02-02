@@ -1,0 +1,97 @@
+#include <iostream>
+#include <vector>
+#include <climits>  // For INT_MAX
+#include <utility>  // For std::pair
+#include <algorithm> // For std::reverse
+
+using namespace std;
+
+// Define a graph as an adjacency list
+using Graph = vector<vector<pair<int, int>>>;  // pair<int, int> -> <neighbor, weight>
+
+// Dijkstra's algorithm implementation
+void dijkstra(const Graph &graph, int source, int destination) {
+    int n = graph.size();
+    vector<int> dist(n, INT_MAX);  // Distances from source
+    vector<int> prev(n, -1);       // Previous vertex on the shortest path
+    dist[source] = 0;
+    
+    // Priority queue to select the vertex with the minimum distance
+    vector<bool> visited(n, false);
+    
+    for (int count = 0; count < n; ++count) {
+        int u = -1;
+        for (int i = 0; i < n; ++i) {
+            if (!visited[i] && (u == -1 || dist[i] < dist[u])) {
+                u = i;
+            }
+        }
+        
+        // Mark the vertex as visited
+        visited[u] = true;
+        
+        // Relax the edges from the selected vertex u
+        for (const auto &neighbor : graph[u]) {
+            int v = neighbor.first;
+            int weight = neighbor.second;
+            
+            if (dist[u] + weight < dist[v]) {
+                dist[v] = dist[u] + weight;
+                prev[v] = u;
+            }
+        }
+    }
+    
+    // Reconstruct the shortest path
+    vector<int> path;
+    for (int v = destination; v != -1; v = prev[v]) {
+        path.push_back(v);
+    }
+    
+    // Reverse the path to show the correct order
+    reverse(path.begin(), path.end());
+    
+    // Print the result
+    cout << "Shortest path from " << source << " to " << destination << ": ";
+    for (int node : path) {
+        cout << node << " ";
+    }
+    cout << "\nTotal cost: " << dist[destination] << endl;
+}
+
+int main() {
+    // Prompt user for the number of vertices
+    int n;
+    cout << "Enter the number of vertices: ";
+    cin >> n;
+
+    // Create a graph with n vertices
+    Graph graph(n);
+
+    // Ask the user to input edges
+    int edges;
+    cout << "Enter the number of edges: ";
+    cin >> edges;
+
+    for (int i = 0; i < edges; ++i) {
+        int u, v, weight;
+        cout << "Enter edge (start vertex, end vertex, weight): ";
+        cin >> u >> v >> weight;
+
+        // Add edge to the graph (undirected graph: add both directions)
+        graph[u].emplace_back(v, weight);
+        graph[v].emplace_back(u, weight);
+    }
+
+    // Ask for the starting and ending nodes
+    int start, end;
+    cout << "Enter the starting node (0 to " << n - 1 << "): ";
+    cin >> start;
+    cout << "Enter the destination node (0 to " << n - 1 << "): ";
+    cin >> end;
+
+    // Run Dijkstra's algorithm
+    dijkstra(graph, start, end);
+
+    return 0;
+}
