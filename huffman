@@ -1,0 +1,98 @@
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+// Node structure for Huffman Tree
+struct Node {
+    char ch;
+    int freq;
+    Node *left, *right;
+    
+    Node(char c, int f) : ch(c), freq(f), left(nullptr), right(nullptr) {}
+};
+
+// Comparator for min-heap
+struct Compare {
+    bool operator()(Node* l, Node* r) {
+        return l->freq > r->freq;
+    }
+};
+
+// Function to perform preorder traversal of the Huffman tree
+void preorderTraversal(Node* root, string code, unordered_map<char, string>& huffmanCodes) {
+    if (root == nullptr) {
+        return;
+    }
+    
+    // If it's a leaf node, store the code
+    if (!root->left && !root->right) {
+        huffmanCodes[root->ch] = code;
+    }
+    
+    // Traverse left and right
+    preorderTraversal(root->left, code + "0", huffmanCodes);
+    preorderTraversal(root->right, code + "1", huffmanCodes);
+}
+
+// Function to build the Huffman Tree
+Node* buildHuffmanTree(const string& S, const vector<int>& f) {
+    priority_queue<Node*, vector<Node*>, Compare> minHeap;
+
+    // Step 1: Create a min-heap of all characters and their frequencies
+    for (int i = 0; i < S.size(); i++) {
+        minHeap.push(new Node(S[i], f[i]));
+    }
+
+    // Step 2: Build the Huffman Tree
+    while (minHeap.size() > 1) {
+        // Extract two nodes with the smallest frequencies
+        Node* left = minHeap.top();
+        minHeap.pop();
+        Node* right = minHeap.top();
+        minHeap.pop();
+
+        // Create a new internal node with the combined frequency
+        Node* newNode = new Node('$', left->freq + right->freq); // '$' is a placeholder
+        newNode->left = left;
+        newNode->right = right;
+
+        // Insert the new node back into the min-heap
+        minHeap.push(newNode);
+    }
+
+    // The remaining node is the root of the Huffman Tree
+    return minHeap.top();
+}
+
+int main() {
+    // User input for characters
+    string S;
+    cout << "Enter the string of characters (distinct): ";
+    cin >> S;
+
+    // User input for frequencies
+    vector<int> f(S.size());
+    cout << "Enter the frequencies for the characters in the string: " << endl;
+    for (int i = 0; i < S.size(); i++) {
+        cout << "Frequency for '" << S[i] << "': ";
+        cin >> f[i];
+    }
+
+    // Step 1: Build the Huffman Tree
+    Node* root = buildHuffmanTree(S, f);
+
+    // Step 2: Perform preorder traversal and generate Huffman codes
+    unordered_map<char, string> huffmanCodes;
+    preorderTraversal(root, "", huffmanCodes);
+
+    // Step 3: Output the Huffman codes
+    cout << "\nCharacter | Huffman Code\n";
+    for (const auto& entry : huffmanCodes) {
+        cout << entry.first << " : " << entry.second << endl;
+    }
+
+    return 0;
+}
